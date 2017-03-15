@@ -168,7 +168,7 @@ class Fraser
                     'name' => $td->eq(3)->text(),
                     'link' => $this->getSchoolUrl($td->eq(3)->filter('a')->extract('href')[0]),
                     'city' => $td->eq(4)->text(),
-                    'ranking' => $td->eq(5)->text(),
+                    'rating' => $td->eq(5)->text(),
                 ]);
             }
         });
@@ -219,11 +219,13 @@ class Fraser
      */
     private function parserArea(string $content): \stdClass
     {
-        preg_match("/(.+),\ (.+)\ (.+)/", $content, $matches);
+        list($city, $other) = explode(',', $content);
+        list($province, $postcode) = explode(' ', trim($other), 2);
+        $postcode = preg_replace('/\s+/', '', $postcode);
         return (object)[
-            'city' => isset($matches[1]) ? $matches[1] : '',
-            'province' => isset($matches[2]) ? $matches[2] : '',
-            'postcode' => isset($matches[3]) ? $matches[3] : '',
+            'city' => $city,
+            'province' => $province,
+            'postcode' => $postcode,
         ];
     }
 
