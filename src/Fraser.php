@@ -150,7 +150,7 @@ class Fraser
     {
         $url = $this->getListUrl();
 
-        $html = Cache::remember($url, 1440, function () use ($url) {
+        $html = Cache::remember($url, $this->config->get('fraser.cache'), function () use ($url) {
             return GoutteFacade::request('GET', $url)->html();
         });
         $crawler = new Crawler($html);
@@ -183,7 +183,7 @@ class Fraser
      */
     public function getDetail(string $url): \stdClass
     {
-        $html = Cache::remember($url, 1440, function () use ($url) {
+        $html = Cache::remember($url, $this->config->get('fraser.cache'), function () use ($url) {
             return GoutteFacade::request('GET', $url)->html();
         });
 
