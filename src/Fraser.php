@@ -178,13 +178,16 @@ class Fraser
      * Getting the school detail.
      *
      * @param string $url
-     * @return \stdClass
+     * @return mixed
      */
-    public function getDetail(string $url): \stdClass
+    public function getDetail(string $url)
     {
         $html = Cache::remember($url, $this->config->get('fraser.cache'), function () use ($url) {
             return GoutteFacade::request('GET', $url)->html();
         });
+        if (preg_match("/Bad\ Request/", $html) > 0) {
+            return false;
+        }
 
         $crawler = new Crawler($html);
         $location = $this->getLocation($crawler->filter('head')->text());

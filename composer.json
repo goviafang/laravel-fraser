@@ -1,7 +1,8 @@
 {
     "name": "goviafang/laravel-fraser",
     "description": "Getting school ranking data from Fraser Institute.",
-    "version": "1.0.2",
+    "keywords": ["laravel", "fraser"],
+    "version": "1.0.3",
     "require": {
         "php": ">=7.1.0",
         "illuminate/support": "~5.0",
