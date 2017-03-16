@@ -154,9 +154,6 @@ class Fraser
             return GoutteFacade::request('GET', $url)->html();
         });
         $crawler = new Crawler($html);
-
-
-
         $response = $crawler->filter('.rating table tr');
 
         $records = new Collection();
@@ -172,7 +169,9 @@ class Fraser
                 ]);
             }
         });
-        return new Collection($records);
+
+        unset($response, $crawler, $html);
+        return $records;
     }
 
     /**
@@ -190,19 +189,23 @@ class Fraser
         $crawler = new Crawler($html);
         $location = $this->getLocation($crawler->filter('head')->text());
         $information = $crawler->filter('#ctl00_ContentPlaceHolder1_SchoolInfoDisplay')->html();
-        $website = array_first($crawler->filter('#ctl00_ContentPlaceHolder1_hlSchoolWebsite')->extract('href'));
+        $website = (string)array_first($crawler->filter('#ctl00_ContentPlaceHolder1_hlSchoolWebsite')->extract('href'));
+        unset($crawler, $html);
+
         $details = array_filter(explode('<br>', $information));
+
         foreach ($details as $key => $detail) {
             $details[$key] = trim(strip_tags($detail));
         }
+
         $area = $this->parserArea($details[3]);
         $phone = $this->parserPhone($details[4]);
         $district = $this->parserDistrict($details[6]);
 
         return (object)[
-            'name' => $details[0],
-            'type' => $details[1],
-            'address' => $details[2],
+            'name' => isset($details[0]) ? $details[0] : '',
+            'type' => isset($details[1]) ? $details[1] : '',
+            'address' => isset($details[2]) ? $details[2] : '',
             'city' => $area->city,
             'province' => $area->province,
             'postcode' => $area->postcode,
@@ -220,8 +223,15 @@ class Fraser
     private function parserArea(string $content): \stdClass
     {
         list($city, $other) = explode(',', $content);
-        list($province, $postcode) = explode(' ', trim($other), 2);
-        $postcode = preg_replace('/\s+/', '', $postcode);
+        $other = trim($other);
+        if (mb_substr_count($other, ' ') > 0) {
+            list($province, $postcode) = explode(' ', $other, 2);
+            $postcode = preg_replace('/\s+/', '', $postcode);
+        }
+        else {
+            $province = $other;
+            $postcode = '';
+        }
         return (object)[
             'city' => $city,
             'province' => $province,
@@ -235,7 +245,7 @@ class Fraser
      */
     private function parserPhone(string $content): string
     {
-        return strtr($content, ['Phone Number: ' => '']);
+        return trim(strtr($content, ['Phone Number:' => '']));
     }
 
     /**
@@ -244,7 +254,7 @@ class Fraser
      */
     private function parserDistrict(string $content): string
     {
-        return strtr($content, ['School District: ' => '']);
+        return trim(strtr($content, ['School District:' => '']));
     }
 
     /**
@@ -259,6 +269,4 @@ class Fraser
             'lng' => isset($matches[2]) ? $matches[2] : '',
         ];
     }
-
-
 }
