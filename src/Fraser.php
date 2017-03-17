@@ -162,10 +162,12 @@ class Fraser
                 $td = $node->filter('td');
                 $records->add((object)[
                     'rank' => $td->eq(0)->text(),
+                    'recent_rank' => $td->eq(1)->text(),
                     'name' => $td->eq(3)->text(),
                     'link' => $this->getSchoolUrl($td->eq(3)->filter('a')->extract('href')[0]),
                     'city' => $td->eq(4)->text(),
                     'rating' => $td->eq(5)->text(),
+                    'recent_rating' => $td->eq(6)->text(),
                 ]);
             }
         });
